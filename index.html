@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хранитель Порталов - Пульт Управления</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-badge">&#127755; ТЕРМИНАЛ ХРАНИТЕЛЯ</div>
+            <h1>Главный по Порталам</h1>
+            <p class="subtitle">Центральный пульт мониторинга и сдерживания межпространственных разломов</p>
+            <a href="./ai-worklog.html" class="worklog-link">&#128211; AI WorkLog</a>
+        </header>
+
+        <!-- Simulation Control Bar -->
+        <section class="controls-bar">
+            <div class="resources-display" id="resources-display">
+                <span class="resource-icon">&#128142;</span>
+                <span class="resource-value" id="resource-value">100</span>
+                <span class="resource-max">/ 200</span>
+                <div class="resource-bar-bg">
+                    <div class="resource-bar-fill" id="resource-bar-fill" style="width:50%"></div>
+                </div>
+                <span class="resource-label">Ресурсы</span>
+            </div>
+            <div class="sim-status">
+                <span class="status-indicator" id="sim-indicator"></span>
+                <span id="sim-mode-label">Симуляция активна</span>
+            </div>
+            <div class="control-buttons">
+                <button class="btn btn-control" id="btn-toggle-auto">&#10074;&#10074; Пауза</button>
+                <button class="btn btn-control" id="btn-manual-tick">&#9654; Шаг времени (+2с)</button>
+                <button class="btn btn-control btn-danger" id="btn-reset-sim">&#8634; Сброс системы</button>
+                <button class="btn btn-sound" id="btn-sound-toggle" title="Включить/выключить звук">&#128362; Звук вкл.</button>
+            </div>
+        </section>
+
+        <!-- Summary Dashboard -->
+        <section id="dashboard" class="dashboard">
+            <div class="stat-card" id="stat-open">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Открытые разломы</span>
+            </div>
+            <div class="stat-card" id="stat-critical">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Критическая угроза</span>
+            </div>
+            <div class="stat-card" id="stat-closed">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Запечатано</span>
+            </div>
+            <div class="stat-card" id="stat-urgent">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Требуют внимания</span>
+            </div>
+        </section>
+
+        <!-- Formula Explanation -->
+        <section id="formula-info" class="formula-info">
+            <span class="info-icon">&#9432;</span>
+            <span class="info-text">
+                <strong>Формула расчёта риска:</strong>
+                Оценка риска = (Энергия &times; 1.5) + (100 &minus; Стабильность) + (300 &divide; max(Время до схлопывания, 1))
+                <br>
+                <em>Объяснение: Высокая энергия, низкая стабильность и близкое схлопывание повышают опасный уровень риска.</em>
+                <br>
+                &rarr; &gt;150 = <strong>КРИТИЧЕСКИЙ</strong>, &gt;100 = <strong>ВЫСОКИЙ</strong>, &gt;60 = <strong>СРЕДНИЙ</strong>, иначе <strong>НИЗКИЙ</strong>
+            </span>
+        </section>
+
+        <!-- Caretaker Actions Explanation Guide -->
+        <section class="actions-guide">
+            <h2>&#128221; Справка по действиям Хранителя</h2>
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="guide-header">
+                        <span class="guide-icon">&#128737;</span>
+                        <strong>1. Стабилизировать</strong>
+                    </div>
+                    <p>Повышает стабильность (+30%), снижает энергию (-10%) и добавляет +20с к времени схлопывания. <em>(Недоступно для закрытых порталов)</em>. Стоимость: 15 ресурсов.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-header">
+                        <span class="guide-icon">&#128274;</span>
+                        <strong>2. Закрыть</strong>
+                    </div>
+                    <p>Безопасно опечатывает портал. <em>(Если внутри находятся существа, требуется эвакуация или подтверждение принудительного закрытия)</em>. Стоимость: 25 ресурсов.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-header">
+                        <span class="guide-icon">&#128065;</span>
+                        <strong>3. Отправить наблюдателя</strong>
+                    </div>
+                    <p>Запускает развед-дрона для сбора данных. <em>(Заблокировано при КРИТИЧЕСКОМ риске)</em>. Стоимость: 10 ресурсов.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-header">
+                        <span class="guide-icon">&#10067;</span>
+                        <strong>4. Пометить «Под вопросом»</strong>
+                    </div>
+                    <p>Переводит портал в режим особого контроля службой безопасности. Стоимость: 5 ресурсов.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portals Table -->
+        <section id="portals-section">
+            <h2>Активные Межпространственные Порталы</h2>
+            <div id="portals-table"></div>
+        </section>
+
+        <!-- Closed Portals Section -->
+        <section id="closed-section" style="display:none; margin-top:28px;">
+            <h2>&#128274; Запечатанные Порталы</h2>
+            <div id="closed-table"></div>
+        </section>
+
+        <!-- Toggle Closed Portals Button -->
+        <div id="closed-toggle-wrapper" style="margin-top:16px; text-align:center;">
+            <button class="btn btn-control" id="btn-toggle-closed">&#128274; Показать запечатанные (0)</button>
+        </div>
+
+        <!-- Action Log -->
+        <section id="action-log-section">
+            <h2>Журнал Событий и Действий Хранителя</h2>
+            <div id="action-log"></div>
+        </section>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h2 id="modal-title">Карточка портала</h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-overlay" class="modal-overlay hidden">
+        <div class="modal modal-sm">
+            <h3 id="confirm-title">Подтверждение действия</h3>
+            <p id="confirm-message"></p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="confirm-yes">Принудительно закрыть</button>
+                <button class="btn btn-secondary" id="confirm-no">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="static/js/app.js"></script>
+</body>
+</html>
